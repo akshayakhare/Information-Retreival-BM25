@@ -1,0 +1,48 @@
+***************************************
+indexer.py
+***************************************
+This file takes in two inputs, the first input(for the sample case can be "tccorpus.txt") takes the corpus file with all the documents and its words.
+This file converts this document into an inverted index of each term with their occurences in the document and their frequency of the document.
+Also all the terms which contain only digits like "0123" are ignored for this indexing.
+
+To achieve this we follow the below steps:
+-- We split the whole document into words, and keep them in a list
+-- Then we split this list into seperate lists of documents by searching for # values in the terms.
+	This is achieved by using groupby funcionality in python
+-- Now we have a list of list, in which the bigger list contains all the documents, and the smaller list contains each term in that document
+-- Using the first element of the smaller list, we assign a dictionary key of doc_index and the value is the list of remaining items
+-- Next we remove all the terms which are only digits, this is achieved by two temporary lists num_list and str_list, and a function contains_Only_Digits which
+	finds any term which contains only digits and returns true
+-- Next we create a tuple of three items. Term, its doc id and its term frequency within that doc. freq_list_tuple stores the list of this tuple, and there are 
+	multiple duplicate values for each term, since one term can be present in multiple documents
+-- Next we create a dictionary of inverted index which will have each term from the freq_list_tupe as key, and a list of tuples of doc id and its term frequency in a
+	tuple as its value. Its stored in inv_index
+-- Once the inverted index is ready, its dumped into the file name which is given as the second argument(for the sample case its "index.out") to the file call.
+-- The data is dumped into the file using json.dump, so that it can be retreived later.
+
+
+***************************************
+BM25.py
+***************************************
+This file takes in four inputs, first is the inverted index file(for the sample case its "index.out") which will be used to calculate the BM25 score for each document
+for the query given in the list of queries from the file as the second argument(for the sample case its "queries.txt"). 
+The third argument (for the sample case its 100) provides the number of top ranked list documents which need to be given as ouput.
+The fourth argument is the final file which we need to give as output(for the sample case its results.eval). This file will give the top ranked documents based on
+the BM25 score, the BM25 score of that document with respect to the query.
+
+To achieve this we follow the below steps:
+-- The inverted index is inported from the first argument, using json.load. The whole data is now a dictionary stored in inv_index
+-- Based on the inv_index value, a dictionary is created which contains a doc id as a key value and the sum of all the term frequencies of all the terms.
+	This value is stored in doc_index
+-- using doc_index, the total number of documents and the average doc length is calculated.
+-- List of queries is received by the file name mentioned in the second argument. This list of queries is stored in a list named query_list
+-- The third argument is stored in max_doc_result which is used to limit the final output file
+-- The whole result computation is completed through multiple inner loops
+-- First loop takes each query individually and sends it as i value
+-- Second loop splits this i into each word of the query, and loops over it, using the element j
+-- If the word is there in the inverted index, then for each document for that term, a BM25 score is calculated. All the items are calculated either using the 
+	inv_index data or the doc_index data. This data is send to the function calculate_BM25 which computes the BM25 score for that document
+-- The second loop continues for each term in the query and the score for each document keeps increasing and kept in the dictionary q_score
+-- Another loop runs within the first loop which sorts q_score based on its score value.
+-- Top ranked documents till the max_doc_result is stored in the final file.
+-- In this way we get the top ranked documents, its score for each query as the final output
